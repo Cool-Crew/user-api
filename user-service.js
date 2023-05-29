@@ -13,7 +13,11 @@ let userSchema = new Schema({
     },
     password: String,
     firstName: String,
-    lastName: String
+    lastName: String,
+    phone: {
+        type: String,
+        unique: true
+    }
 });
 
 let User;

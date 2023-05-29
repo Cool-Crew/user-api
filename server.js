@@ -59,6 +59,7 @@ app.post('/api/register', (req, res) => {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          phone: user.phone,
         };
   
         var token = jwt.sign(payload, jwtOptions.secretOrKey);
