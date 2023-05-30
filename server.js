@@ -71,6 +71,19 @@ app.post('/api/register', (req, res) => {
       });
   });
 
+  app.put('/api/update', passport.authenticate('jwt', { session: false }), (req, res) => {
+    console.log('Received update request with data:', req.body);
+    userService
+      .updateUser(req.body)
+      .then(user => {
+        res.json({ message: 'User information updated successfully', user: user });
+      })
+      .catch(err => {
+        console.error('Error updating user:', err);
+        res.status(500).json({ message: 'An error occurred while updating user information' });
+      });
+  });
+
   app.get(
     "/api/test",
     passport.authenticate("jwt", { session: false }),

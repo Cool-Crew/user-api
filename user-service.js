@@ -81,3 +81,18 @@ module.exports.checkUser = function (userData) {
             });
     });
 };
+
+module.exports.updateUser = function (userData) {
+    console.log('Updating user with data:', userData);
+    return new Promise(function (resolve, reject) {
+        User.findOneAndUpdate({ email: userData.email }, userData, { new: true })
+            .exec()
+            .then(user => {
+                console.log('Updated user:', userData);
+                resolve(user);
+            }).catch(err => {
+                console.error('Error updating user:', err);
+                reject("Unable to update user " + userData.email);
+            });
+    });
+};
