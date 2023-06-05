@@ -1,6 +1,6 @@
-const express = require('express');
+const express = require("express");
 const cors = require("cors");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const passport = require("passport");
 const passportJWT = require("passport-jwt");
 const dotenv = require("dotenv");
@@ -39,64 +39,79 @@ app.use(express.json());
 app.use(cors());
 
 /* TODO Add Your Routes Here */
-app.post('/api/register', (req, res) => {
-    userService
-      .registerUser(req.body)
-      .then((msg) => {
-        res.json({ message: msg });
-      })
-      .catch((msg) => {
-        res.status(422).json({ message: msg });
-      });
-  });
+app.post("/api/register", (req, res) => {
+  userService
+    .registerUser(req.body)
+    .then((msg) => {
+      res.json({ message: msg });
+    })
+    .catch((msg) => {
+      res.status(422).json({ message: msg });
+    });
+});
 
-  app.post("/api/login", (req, res) => {
-    userService
-      .checkUser(req.body)
-      .then((user) => {
-        var payload = {
-          _id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-        };
-  
-        var token = jwt.sign(payload, jwtOptions.secretOrKey);
-  
-        res.json({ message: "login successful", token: token });
-      })
-      .catch((msg) => {
-        res.status(422).json({ message: msg });
-      });
-  });
+app.post("/api/login", (req, res) => {
+  userService
+    .checkUser(req.body)
+    .then((user) => {
+      var payload = {
+        _id: user._id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        classes: user.classes,
+        interests: user.interests,
+      };
 
-  app.put('/api/update', passport.authenticate('jwt', { session: false }), (req, res) => {
-    console.log('Received update request with data:', req.body);
+      var token = jwt.sign(payload, jwtOptions.secretOrKey);
+
+      res.json({ message: "login successful", token: token });
+    })
+    .catch((msg) => {
+      res.status(422).json({ message: msg });
+    });
+});
+
+app.put(
+  "/api/update",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    console.log("Received update request with data:", req.body);
     userService
       .updateUser(req.body)
-      .then(user => {
-        res.json({ message: 'User information updated successfully', user: user });
+      .then((user) => {
+        res.json({
+          message: "User information updated successfully",
+          user: user,
+        });
       })
-      .catch(err => {
-        console.error('Error updating user:', err);
-        res.status(500).json({ message: 'An error occurred while updating user information' });
+      .catch((err) => {
+        console.error("Error updating user:", err);
+        res.status(500).json({
+          message: "An error occurred while updating user information",
+        });
       });
-  });
+  }
+);
 
-  app.get(
-    "/api/test",
-    passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-      res.json({ message: "test success" });
-    }
-  );
+app.get(
+  "/api/test",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({ message: "test success" });
+  }
+);
 
-userService.connect()
-.then(() => {
-    app.listen(HTTP_PORT, () => { console.log("API listening on: " + HTTP_PORT) });
-})
-.catch((err) => {
+userService
+  .connect()
+  .then(() => {
+    app.listen(HTTP_PORT, () => {
+      console.log("API listening on: " + HTTP_PORT);
+    });
+  })
+  .catch((err) => {
     console.log("unable to start the server: " + err);
     process.exit();
-});
+  });
