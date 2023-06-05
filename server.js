@@ -97,6 +97,36 @@ app.put(
 );
 
 app.get(
+  "/api/refresh-token",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.user._id;
+    userService
+      .getUserById(userId)
+      .then((user) => {
+        var payload = {
+          _id: user._id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          classes: user.classes,
+          interests: user.interests,
+        };
+        var token = jwt.sign(payload, jwtOptions.secretOrKey);
+        res.json({ message: "refreshed token", token: token });
+      })
+      .catch((err) => {
+        console.error("Error retrieving user:", err);
+        res
+          .status(500)
+          .json({ message: "An error occurred while refreshing the token" });
+      });
+  }
+);
+
+app.get(
   "/api/test",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {

@@ -89,6 +89,23 @@ module.exports.checkUser = function (userData) {
   });
 };
 
+module.exports.getUserById = function (userId) {
+  return new Promise(function (resolve, reject) {
+    User.findById(userId)
+      .exec()
+      .then((user) => {
+        if (user) {
+          resolve(user);
+        } else {
+          reject("User not found");
+        }
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
+};
+
 module.exports.updateUser = function (userData) {
   console.log("Updating user with data:", userData);
   return new Promise(function (resolve, reject) {
