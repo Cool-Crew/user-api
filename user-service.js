@@ -57,6 +57,7 @@ module.exports.registerUser = function (userData) {
         newUser.save((err) => {
           if (err) {
             if (err.code === 11000) {
+              console.log("Error registering user:", err);
               reject("Email or username already registered");
             } else {
               reject("There was an error creating the user: " + err);
