@@ -9,6 +9,7 @@ const app = express();
 dotenv.config();
 
 const userService = require("./user-service.js");
+const rideService = require("./ride-service.js");
 
 const HTTP_PORT = process.env.PORT || 8080;
 
@@ -49,6 +50,21 @@ app.post("/api/register", (req, res) => {
       res.status(422).json({ message: msg });
     });
 });
+
+app.post(
+  "/api/register-ride",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .registerRide(req.body)
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
 
 app.post("/api/login", (req, res) => {
   userService
@@ -134,14 +150,49 @@ app.get(
   }
 );
 
-userService
-  .connect()
+app.post(
+  "/api/rides/:rideId/riders",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const rideId = req.params.rideId;
+    const riderData = req.body;
+
+    rideService
+      .addRiderToRide(rideId, riderData)
+      .then(() => {
+        res.json({ message: "Rider added to the ride" });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
+app.delete(
+  "/api/rides/:rideId/riders/:riderId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const rideId = req.params.rideId;
+    const riderId = req.params.riderId;
+
+    rideService
+      .removeRiderFromRide(rideId, riderId)
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
+
+Promise.all([userService.connect(), rideService.connect()])
   .then(() => {
     app.listen(HTTP_PORT, () => {
-      console.log("API listening on: " + HTTP_PORT);
+      console.log("API listening on port: " + HTTP_PORT);
     });
   })
   .catch((err) => {
-    console.log("unable to start the server: " + err);
-    process.exit();
+    console.log("Unable to start the server: " + err);
+    process.exit(1);
   });
