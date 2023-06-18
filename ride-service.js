@@ -50,9 +50,15 @@ module.exports.connect = function () {
   });
 };
 
-module.exports.getRides = async () => {
+module.exports.getRide = async (rideId = null) => {
+  var rides;
+  
   try{
-    let rides = await rideSchema.find();
+    if (rideId){
+      rides = await rideSchema.findOne({_id: rideId});
+    } else {
+      rides = await rideSchema.find();
+    }   
 
     return rides;
   }
