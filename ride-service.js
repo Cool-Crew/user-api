@@ -50,6 +50,17 @@ module.exports.connect = function () {
   });
 };
 
+module.exports.getRides = async () => {
+  try{
+    let rides = await rideSchema.find();
+
+    return rides;
+  }
+  catch (err){
+    console.log(`${err}`);
+  }
+}
+
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
     let newRide = new Ride(rideData);
