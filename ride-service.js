@@ -26,8 +26,8 @@ const rideSchema = new mongoose.Schema({
   ],
   status: {
     type: String,
-    enum: ["Not Started", "In-Progress", "Complete", "Cancelled"],
-    default: "Not Started",
+    enum: ["Not_Started", "In_Progress", "Complete", "Cancelled"],
+    default: "Not_Started",
   },
 });
 
@@ -52,20 +52,19 @@ module.exports.connect = function () {
 
 module.exports.getRide = async (rideId = null) => {
   var rides;
-  
-  try{
-    if (rideId){
-      rides = await rideSchema.findOne({_id: rideId});
+
+  try {
+    if (rideId) {
+      rides = await rideSchema.findOne({ _id: rideId });
     } else {
       rides = await rideSchema.find();
-    }   
+    }
 
     return rides;
-  }
-  catch (err){
+  } catch (err) {
     console.log(`${err}`);
   }
-}
+};
 
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
