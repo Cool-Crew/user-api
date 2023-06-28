@@ -7,7 +7,7 @@ let mongoDBConnectionString = process.env.MONGO_URL;
 let Schema = mongoose.Schema;
 
 const rideSchema = new mongoose.Schema({
-  driver: { type: String, required: true },
+  driver: { type: String },
   driverStartLocation: { type: String },
   riders: [
     {

@@ -55,6 +55,7 @@ app.post(
   "/api/register-ride",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    console.log(req.body);
     rideService
       .registerRide(req.body)
       .then((msg) => {
