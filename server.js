@@ -155,8 +155,10 @@ app.get(
   "/api/rides",
   passport.authenticate("jwt", {session: false}),
   (req, res) => {
+    console.log(req);
     rideService.getRide()
     .then((rides) => {
+      console.log(rides);
       res.json({message: 'rides', _rides: rides})
     })
     .catch((err) => {

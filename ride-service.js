@@ -55,10 +55,12 @@ module.exports.getRide = async (rideId = null) => {
 
   try {
     if (rideId) {
-      rides = await rideSchema.findOne({ _id: rideId });
+      rides = await Ride.findOne({ _id: rideId });
     } else {
-      rides = await rideSchema.find();
+      rides = await Ride.find();
     }
+
+    console.log(rides);
 
     return rides;
   } catch (err) {
