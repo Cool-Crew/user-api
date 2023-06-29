@@ -22,6 +22,7 @@ const rideSchema = new mongoose.Schema({
       riderID: { type: String },
       pickupLocation: { type: locationSchema },
     },
+    {_id: false},
   ],
   dropoffLocation: { type: locationSchema },
   dateTime: { type: Date },
@@ -95,6 +96,7 @@ module.exports.addRiderToRide = function (rideId, riderData) {
       { $push: { riders: riderData } },
       { new: true },
       (err, updatedRide) => {
+        
         if (err) {
           reject("There was an error adding the rider to the ride: " + err);
         } else {

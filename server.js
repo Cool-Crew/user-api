@@ -168,8 +168,8 @@ app.post(
   "/api/rides/:rideId/riders",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const rideId = req.params.rideId;
-    const riderData = req.body;
+    const rideId = req.body.rideId;
+    const riderData = req.body.newRider;
 
     rideService
       .addRiderToRide(rideId, riderData)
@@ -204,6 +204,7 @@ app.delete(
   (req, res) => {
     const rideId = req.params.rideId;
     const riderId = req.params.riderId;
+    console.log(req.params)
 
     rideService
       .removeRiderFromRide(rideId, riderId)
