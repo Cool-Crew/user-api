@@ -68,8 +68,6 @@ module.exports.getRide = async (rideId = null) => {
       rides = await Ride.find();
     }
 
-    console.log(rides);
-
     return rides;
   } catch (err) {
     console.log(`${err}`);
@@ -79,8 +77,6 @@ module.exports.getRide = async (rideId = null) => {
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
     let newRide = new Ride(rideData);
-    console.log(rideData);
-    console.log(newRide)
 
     newRide.save((err) => {
       if (err) {
@@ -108,6 +104,25 @@ module.exports.addRiderToRide = function (rideId, riderData) {
     );
   });
 };
+
+module.exports.addDriverToRide = (rideId, driverData) => {
+
+  return new Promise(function (resolve,reject) {
+    Ride.findByIdAndUpdate(
+      rideId,
+      {driver: driverData},
+      {new: true},
+      (err, updatedRide) => {
+        console.log(`updated ride is\n${JSON.stringify(updatedRide)}`);
+        if (err){
+          reject(`There was an error updating the ride`)
+        } else {
+          resolve(`Driver successfully added to the ride`)
+        }
+      }
+    )
+  })
+} 
 
 module.exports.removeRiderFromRide = function (rideId, riderId) {
   return new Promise(function (resolve, reject) {
