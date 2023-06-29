@@ -6,16 +6,24 @@ let mongoDBConnectionString = process.env.MONGO_URL;
 
 let Schema = mongoose.Schema;
 
+const locationSchema = new mongoose.Schema({
+  address: {type: String},
+  location: {},
+  name: {type: String},
+  },
+  {_id: false}
+  )
+
 const rideSchema = new mongoose.Schema({
   driver: { type: String },
   driverStartLocation: { type: String },
   riders: [
     {
       riderID: { type: String },
-      pickupLocation: { type: String },
+      pickupLocation: { type: locationSchema },
     },
   ],
-  dropoffLocation: { type: String },
+  dropoffLocation: { type: locationSchema },
   dateTime: { type: Date },
   chat: [
     {
@@ -71,6 +79,9 @@ module.exports.getRide = async (rideId = null) => {
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
     let newRide = new Ride(rideData);
+    console.log(rideData);
+    console.log(newRide)
+
     newRide.save((err) => {
       if (err) {
         reject("There was an error creating the ride: " + err);
