@@ -71,9 +71,6 @@ module.exports.getRide = async (rideId = null) => {
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
     let newRide = new Ride(rideData);
-    //curently not saving the dropoff location?
-    //console.log(rideDate);
-    //console.log(newRide);
     newRide.save((err) => {
       if (err) {
         reject("There was an error creating the ride: " + err);
