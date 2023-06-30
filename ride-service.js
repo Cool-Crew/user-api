@@ -18,19 +18,14 @@ const rideSchema = new mongoose.Schema({
           location: {},
           name: { type: String },
         },
-        { _id: false },
       ],
     },
-    { _id: false },
   ],
-  dropoffLocation: [
-    {
-      address: { type: String },
-      location: {},
-      name: { type: String },
-    },
-    { _id: false },
-  ],
+  dropoffLocation: {
+    address: { type: String },
+    location: {},
+    name: { type: String },
+  },
   dateTime: { type: Date },
   chat: [
     {
