@@ -6,25 +6,31 @@ let mongoDBConnectionString = process.env.MONGO_URL;
 
 let Schema = mongoose.Schema;
 
-const locationSchema = new mongoose.Schema({
-  address: {type: String},
-  location: {},
-  name: {type: String},
-  },
-  {_id: false}
-  )
-
 const rideSchema = new mongoose.Schema({
   driver: { type: String },
   driverStartLocation: { type: String },
   riders: [
     {
       riderID: { type: String },
-      pickupLocation: { type: locationSchema },
+      pickupLocation: [
+        {
+          address: { type: String },
+          location: {},
+          name: { type: String },
+        },
+        { _id: false },
+      ],
     },
-    {_id: false},
+    { _id: false },
   ],
-  dropoffLocation: { type: locationSchema },
+  dropoffLocation: [
+    {
+      address: { type: String },
+      location: {},
+      name: { type: String },
+    },
+    { _id: false },
+  ],
   dateTime: { type: Date },
   chat: [
     {
@@ -96,7 +102,6 @@ module.exports.addRiderToRide = function (rideId, riderData) {
       { $push: { riders: riderData } },
       { new: true },
       (err, updatedRide) => {
-        
         if (err) {
           reject("There was an error adding the rider to the ride: " + err);
         } else {
@@ -108,23 +113,22 @@ module.exports.addRiderToRide = function (rideId, riderData) {
 };
 
 module.exports.addDriverToRide = (rideId, driverData) => {
-
-  return new Promise(function (resolve,reject) {
+  return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(
       rideId,
-      {driver: driverData},
-      {new: true},
+      { driver: driverData },
+      { new: true },
       (err, updatedRide) => {
         console.log(`updated ride is\n${JSON.stringify(updatedRide)}`);
-        if (err){
-          reject(`There was an error updating the ride`)
+        if (err) {
+          reject(`There was an error updating the ride`);
         } else {
-          resolve(`Driver successfully added to the ride`)
+          resolve(`Driver successfully added to the ride`);
         }
       }
-    )
-  })
-} 
+    );
+  });
+};
 
 module.exports.removeRiderFromRide = function (rideId, riderId) {
   return new Promise(function (resolve, reject) {

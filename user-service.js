@@ -21,6 +21,7 @@ let userSchema = new Schema({
   phone: {
     type: String,
     unique: true,
+    sparse: true,
   },
   classes: [String],
   interests: [String],
@@ -53,6 +54,7 @@ module.exports.registerUser = function (userData) {
         userData.password = hash;
 
         let newUser = new User(userData);
+        console.log(userData);
 
         newUser.save((err) => {
           if (err) {
