@@ -1,98 +1,126 @@
-const mongoose = require('mongoose');
-mongoose.set('useFindAndModify', false);
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+mongoose.set("useFindAndModify", false);
+const bcrypt = require("bcryptjs");
 
 let mongoDBConnectionString = process.env.MONGO_URL;
 
 let Schema = mongoose.Schema;
 
 let userSchema = new Schema({
-    email: {
-        type: String,
-        unique: true
-    },
-    password: String,
-    firstName: String,
-    lastName: String,
-    phone: {
-        type: String,
-        unique: true
-    }
+  email: {
+    type: String,
+    unique: true,
+  },
+  username: {
+    type: String,
+    unique: true,
+  },
+  password: String,
+  firstName: String,
+  lastName: String,
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  classes: [String],
+  interests: [String],
 });
 
 let User;
 
 module.exports.connect = function () {
-    return new Promise(function (resolve, reject) {
-        let db = mongoose.createConnection(mongoDBConnectionString, { useUnifiedTopology: true });
-
-        db.on('error', err => {
-            reject(err);
-        });
-
-        db.once('open', () => {
-            User = db.model("users", userSchema);
-            resolve();
-        });
+  return new Promise(function (resolve, reject) {
+    let db = mongoose.createConnection(mongoDBConnectionString, {
+      useUnifiedTopology: true,
     });
+
+    db.on("error", (err) => {
+      reject(err);
+    });
+
+    db.once("open", () => {
+      User = db.model("users", userSchema);
+      resolve();
+    });
+  });
 };
 
 module.exports.registerUser = function (userData) {
-    return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
+    bcrypt
+      .hash(userData.password, 10)
+      .then((hash) => {
+        userData.password = hash;
 
-            bcrypt.hash(userData.password, 10).then(hash => {
+        let newUser = new User(userData);
+        console.log(userData);
 
-                userData.password = hash;
-
-                let newUser = new User(userData);
-
-                newUser.save(err => {
-                    if (err) {
-                        if (err.code == 11000) {
-                            reject("Email already registered");
-                        } else {
-                            reject("There was an error creating the user: " + err);
-                        }
-
-                    } else {
-                        resolve("User " + userData.email + " successfully registered");
-                    }
-                });
-            })
-                .catch(err => reject(err));
-    });
+        newUser.save((err) => {
+          if (err) {
+            if (err.code === 11000) {
+              console.log("Error registering user:", err);
+              reject("Email or username already registered");
+            } else {
+              reject("There was an error creating the user: " + err);
+            }
+          } else {
+            resolve("User " + userData.email + " successfully registered");
+          }
+        });
+      })
+      .catch((err) => reject(err));
+  });
 };
 
 module.exports.checkUser = function (userData) {
-    return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
+    User.findOne({ email: userData.email })
+      .exec()
+      .then((user) => {
+        bcrypt.compare(userData.password, user.password).then((res) => {
+          if (res === true) {
+            resolve(user);
+          } else {
+            reject("Incorrect password for user " + userData.email);
+          }
+        });
+      })
+      .catch((err) => {
+        reject("Unable to find user " + userData.email);
+      });
+  });
+};
 
-        User.findOne({ email: userData.email })
-            .exec()
-            .then(user => {
-                bcrypt.compare(userData.password, user.password).then(res => {
-                    if (res === true) {
-                        resolve(user);
-                    } else {
-                        reject("Incorrect password for user " + userData.email);
-                    }
-                });
-            }).catch(err => {
-                reject("Unable to find user " + userData.email);
-            });
-    });
+module.exports.getUserById = function (userId) {
+  return new Promise(function (resolve, reject) {
+    User.findById(userId)
+      .exec()
+      .then((user) => {
+        if (user) {
+          resolve(user);
+        } else {
+          reject("User not found");
+        }
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
 };
 
 module.exports.updateUser = function (userData) {
-    console.log('Updating user with data:', userData);
-    return new Promise(function (resolve, reject) {
-        User.findOneAndUpdate({ email: userData.email }, userData, { new: true })
-            .exec()
-            .then(user => {
-                console.log('Updated user:', userData);
-                resolve(user);
-            }).catch(err => {
-                console.error('Error updating user:', err);
-                reject("Unable to update user " + userData.email);
-            });
-    });
+  console.log("Updating user with data:", userData);
+  return new Promise(function (resolve, reject) {
+    User.findOneAndUpdate({ email: userData.email }, userData, { new: true })
+      .exec()
+      .then((user) => {
+        console.log("Updated user:", userData);
+        resolve(user);
+      })
+      .catch((err) => {
+        console.error("Error updating user:", err);
+        reject("Unable to update user " + userData.email);
+      });
+  });
 };
