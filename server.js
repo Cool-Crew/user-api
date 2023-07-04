@@ -168,7 +168,8 @@ app.post(
   "/api/rides/:rideId/riders",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const rideId = req.body.rideId;
+
+    const rideId = req.body.ride;
     const riderData = req.body.newRider;
 
     rideService
@@ -205,6 +206,20 @@ app.post(
     rideService.addDriverToRide(req.body?.ride, req.body?.newDriver)
     .then(() => {
       res.json({message: `Driver has been added to ride: ${req.body?.ride}`});
+    })
+    .catch((err) => {
+      res.status(422).json({message: err});
+    })
+  }
+)
+
+app.delete(
+  "/api/rides/:rideId/driver",
+  passport.authenticate("jwt", {session: false}),
+  (req, res) => {
+    rideService.rmDriverToRide(req.params.rideId)
+    .then(() => {
+      res.json({message: `Driver has been removed from ride: ${req.body?.ride}`});
     })
     .catch((err) => {
       res.status(422).json({message: err});

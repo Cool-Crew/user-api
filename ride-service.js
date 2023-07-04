@@ -112,10 +112,11 @@ module.exports.cancelRide = function (rideId) {
 
 
 module.exports.addRiderToRide = function (rideId, riderData) {
+  
   return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(
       rideId,
-      { $push: { riders: riderData } },
+      { $push: { riders: {riderID: riderData} } },
       { new: true },
       (err, updatedRide) => {
         if (err) {
@@ -145,6 +146,24 @@ module.exports.addDriverToRide = (rideId, driverData) => {
     );
   });
 };
+
+module.exports.rmDriverToRide = (rideId) => {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(
+      rideId,
+      { driver: null },
+      { new: true },
+      (err, updatedRide) => {
+        console.log(`updated ride is\n${JSON.stringify(updatedRide)}`);
+        if (err) {
+          reject(`There was an error updating the ride`);
+        } else {
+          resolve(`Driver successfully added to the ride`);
+        }
+      }
+    );
+  });
+}
 
 module.exports.removeRiderFromRide = function (rideId, riderId) {
   return new Promise(function (resolve, reject) {
