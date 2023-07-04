@@ -198,6 +198,20 @@ app.post(
   }
 )
 
+app.delete(
+  "/api/rides/:rideId/driver",
+  passport.authenticate("jwt", {session: false}),
+  (req, res) => {
+    rideService.rmDriverToRide(req.params.rideId)
+    .then(() => {
+      res.json({message: `Driver has been removed from ride: ${req.body?.ride}`});
+    })
+    .catch((err) => {
+      res.status(422).json({message: err});
+    })
+  }
+)
+
 
 app.delete(
   "/api/rides/:rideId/riders/:riderId",
