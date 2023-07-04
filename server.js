@@ -182,6 +182,21 @@ app.post(
   }
 );
 
+app.patch(
+  "/api/rides/:rideId/cancel",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .cancelRide(req.params.rideId)
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
+
 app.post(
   "/api/rides/:rideId/driver",
   passport.authenticate("jwt", {session: false}),

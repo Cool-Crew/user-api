@@ -90,6 +90,27 @@ module.exports.registerRide = function (rideData) {
   });
 };
 
+module.exports.cancelRide = function (rideId) {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(
+      rideId,
+      { status: "Cancelled"},
+      { new: true }
+    )
+    .then((ride) => {
+      if (!ride) {
+        reject("Ride not found");
+      } else {
+        resolve("Ride has been cancelled");
+      }
+    })
+    .catch((err) => {
+      reject("There was an error cancelling the ride: " + err);
+    });
+  });
+};
+
+
 module.exports.addRiderToRide = function (rideId, riderData) {
   return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(
