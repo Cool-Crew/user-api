@@ -168,7 +168,8 @@ app.post(
   "/api/rides/:rideId/riders",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const rideId = req.body.rideId;
+
+    const rideId = req.body.ride;
     const riderData = req.body.newRider;
 
     rideService

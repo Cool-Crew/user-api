@@ -91,10 +91,11 @@ module.exports.registerRide = function (rideData) {
 };
 
 module.exports.addRiderToRide = function (rideId, riderData) {
+  
   return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(
       rideId,
-      { $push: { riders: riderData } },
+      { $push: { riders: {riderID: riderData} } },
       { new: true },
       (err, updatedRide) => {
         if (err) {
