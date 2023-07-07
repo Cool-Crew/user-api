@@ -25,6 +25,16 @@ let userSchema = new Schema({
   },
   classes: [String],
   interests: [String],
+  notifications: [
+    {
+      msg: { type: String },
+      category: {
+        type: String,
+        enum: ["Ride", "Account_Update", "General"],
+        default: "General",
+      },
+    },
+  ],
 });
 
 let User;

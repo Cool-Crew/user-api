@@ -79,6 +79,7 @@ app.post("/api/login", (req, res) => {
         phone: user.phone,
         classes: user.classes,
         interests: user.interests,
+        notifications: user.notifications,
       };
 
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
@@ -129,6 +130,7 @@ app.get(
           phone: user.phone,
           classes: user.classes,
           interests: user.interests,
+          notifications: user.notifications,
         };
         var token = jwt.sign(payload, jwtOptions.secretOrKey);
         res.json({ message: "refreshed token", token: token });
@@ -152,23 +154,23 @@ app.get(
 
 app.get(
   "/api/rides",
-  passport.authenticate("jwt", {session: false}),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    rideService.getRide()
-    .then((rides) => {
-      res.json({message: 'rides', _rides: rides})
-    })
-    .catch((err) => {
-      res.status(500).json({message: `unable to retreive rides\n${err}`});
-    })
+    rideService
+      .getRide()
+      .then((rides) => {
+        res.json({ message: "rides", _rides: rides });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: `unable to retreive rides\n${err}` });
+      });
   }
-)
+);
 
 app.post(
   "/api/rides/:rideId/riders",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-
     const rideId = req.body.ride;
     const riderData = req.body.newRider;
 
@@ -200,33 +202,37 @@ app.patch(
 
 app.post(
   "/api/rides/:rideId/driver",
-  passport.authenticate("jwt", {session: false}),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
-
-    rideService.addDriverToRide(req.body?.ride, req.body?.newDriver)
-    .then(() => {
-      res.json({message: `Driver has been added to ride: ${req.body?.ride}`});
-    })
-    .catch((err) => {
-      res.status(422).json({message: err});
-    })
+    rideService
+      .addDriverToRide(req.body?.ride, req.body?.newDriver)
+      .then(() => {
+        res.json({
+          message: `Driver has been added to ride: ${req.body?.ride}`,
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
   }
-)
+);
 
 app.delete(
   "/api/rides/:rideId/driver",
-  passport.authenticate("jwt", {session: false}),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    rideService.rmDriverToRide(req.params.rideId)
-    .then(() => {
-      res.json({message: `Driver has been removed from ride: ${req.body?.ride}`});
-    })
-    .catch((err) => {
-      res.status(422).json({message: err});
-    })
+    rideService
+      .rmDriverToRide(req.params.rideId)
+      .then(() => {
+        res.json({
+          message: `Driver has been removed from ride: ${req.body?.ride}`,
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
   }
-)
-
+);
 
 app.delete(
   "/api/rides/:rideId/riders/:riderId",
@@ -234,7 +240,7 @@ app.delete(
   (req, res) => {
     const rideId = req.params.rideId;
     const riderId = req.params.riderId;
-    console.log(req.params)
+    console.log(req.params);
 
     rideService
       .removeRiderFromRide(rideId, riderId)
