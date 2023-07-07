@@ -15,6 +15,7 @@ const rideSchema = Schema({
   },
   riders: [
     {
+      _id: false,
       riderID: { type: String },
       pickupLocation: [
         {
@@ -33,7 +34,6 @@ const rideSchema = Schema({
   dateTime: { type: Date },
   chat: [
     {
-      msgID: { type: String },
       content: { type: String },
       userID: { type: String },
     },

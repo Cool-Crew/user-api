@@ -253,6 +253,26 @@ app.delete(
   }
 );
 
+//Notifications
+
+app.post(
+  "/api/notifications/:userId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+    const notificationData = req.body;
+
+    userService
+      .addNotification(userId, notificationData)
+      .then(() => {
+        res.json({ message: "Notification added successfully" });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
 Promise.all([userService.connect(), rideService.connect()])
   .then(() => {
     app.listen(HTTP_PORT, () => {

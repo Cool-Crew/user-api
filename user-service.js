@@ -134,3 +134,23 @@ module.exports.updateUser = function (userData) {
       });
   });
 };
+
+module.exports.addNotification = function (userId, notificationData) {
+  return new Promise(function (resolve, reject) {
+    User.findById(userId)
+      .exec()
+      .then((user) => {
+        user.notifications.push(notificationData);
+        user.save((err) => {
+          if (err) {
+            reject("Unable to add notification");
+          } else {
+            resolve("Notification added successfully");
+          }
+        });
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
+};
