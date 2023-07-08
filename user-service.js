@@ -28,6 +28,7 @@ let userSchema = new Schema({
   notifications: [
     {
       msg: { type: String },
+      dateTime: { type: Date },
       category: {
         type: String,
         enum: ["Ride", "Account_Update", "General"],
