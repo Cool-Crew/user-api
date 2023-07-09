@@ -17,13 +17,11 @@ const rideSchema = Schema({
     {
       _id: false,
       riderID: { type: String },
-      pickupLocation: [
-        {
-          address: { type: String },
-          location: {},
-          name: { type: String },
-        },
-      ],
+      pickupLocation: {
+        address: { type: String },
+        location: {},
+        name: { type: String },
+      },
     },
   ],
   dropoffLocation: {
@@ -114,7 +112,18 @@ module.exports.addRiderToRide = function (rideId, riderData) {
   return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(
       rideId,
-      { $push: { riders: { riderID: riderData } } },
+      {
+        $push: {
+          riders: {
+            riderID: riderData.riderID,
+            pickupLocation: {
+              address: riderData.pickupLocation.address,
+              location: riderData.pickupLocation.location,
+              name: riderData.pickupLocation.name,
+            },
+          },
+        },
+      },
       { new: true },
       (err, updatedRide) => {
         if (err) {
