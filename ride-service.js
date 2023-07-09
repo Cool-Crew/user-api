@@ -8,6 +8,7 @@ let Schema = mongoose.Schema;
 
 const rideSchema = Schema({
   driver: { type: String },
+  creator: { type: String },
   driverStartLocation: {
     address: { type: String },
     location: {},
