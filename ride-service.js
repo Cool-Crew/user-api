@@ -37,6 +37,13 @@ const rideSchema = Schema({
       userID: { type: String },
     },
   ],
+  feedback: [
+    {
+      riderId: { type: String },
+      rating: { type: Number },
+      feedback: { type: String },
+    },
+  ],
   status: {
     type: String,
     enum: ["Not_Started", "In_Progress", "Complete", "Cancelled"],
@@ -77,6 +84,39 @@ module.exports.getRide = async (rideId = null) => {
   } catch (err) {
     console.log(`${err}`);
   }
+};
+
+module.exports.getRidesOfUser = (riderId) => {
+  return new Promise((resolve, reject) => {
+    Ride.find(
+      { "riders.riderID": riderId },
+      { _id: 1, dropoffLocation: 1, status: 1, dateTime: 1, "riders.$": 1 }
+    )
+      .then((rides) => {
+        if (rides.length > 0) {
+          const rideList = rides.map((ride) => {
+            const { dropoffLocation, status, dateTime, riders } = ride;
+            const rider = riders.find((r) => r.riderID === riderId);
+            const { pickupLocation } = rider;
+
+            return {
+              rideId: ride._id,
+              pickupLocation: pickupLocation.name,
+              dropoffLocation: dropoffLocation.name,
+              dateTime,
+              status,
+            };
+          });
+
+          resolve(rideList);
+        } else {
+          resolve([]);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
 };
 
 module.exports.registerRide = function (rideData) {
@@ -152,6 +192,32 @@ module.exports.addDriverToRide = (rideId, driverData) => {
         }
       }
     );
+  });
+};
+
+module.exports.addFeedbackToRide = (rideId, userId, rating, feedback) => {
+  return new Promise(function (resolve, reject) {
+    const feedbackData = {
+      riderId: userId,
+      rating: rating,
+      feedback: feedback,
+    };
+
+    Ride.findByIdAndUpdate(
+      rideId,
+      { $push: { feedback: feedbackData } },
+      { new: true }
+    )
+      .then((updatedRide) => {
+        if (updatedRide) {
+          resolve(updatedRide);
+        } else {
+          reject(new Error("Ride not found"));
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };
 
