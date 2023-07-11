@@ -269,22 +269,26 @@ app.delete(
 );
 
 //Feedback Submission
-app.post("/api/addFeedback/:rideId", (req, res) => {
-  const rideId = req.params.rideId;
-  const riderId = req.body.riderId;
-  const feedback = req.body.rideFeedback || "";
-  const rating = req.body.rideRating;
-  rideService
-    .addFeedbackToRide(rideId, riderId, rating, feedback)
-    .then(() => {
-      res.json({
-        message: `Feedback has been added`,
+app.post(
+  "/api/addFeedback/:rideId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const rideId = req.params.rideId;
+    const riderId = req.body.riderId;
+    const feedback = req.body.rideFeedback || "";
+    const rating = req.body.rideRating;
+    rideService
+      .addFeedbackToRide(rideId, riderId, rating, feedback)
+      .then(() => {
+        res.json({
+          message: `Feedback has been added`,
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
       });
-    })
-    .catch((err) => {
-      res.status(422).json({ message: err });
-    });
-});
+  }
+);
 
 //Notifications
 
