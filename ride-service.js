@@ -89,23 +89,47 @@ module.exports.getRide = async (rideId = null) => {
 module.exports.getRidesOfUser = (riderId) => {
   return new Promise((resolve, reject) => {
     Ride.find(
-      { "riders.riderID": riderId },
-      { _id: 1, dropoffLocation: 1, status: 1, dateTime: 1, "riders.$": 1 }
+      {
+        $or: [{ "riders.riderID": riderId }, { driver: riderId }],
+      },
+      {
+        _id: 1,
+        dropoffLocation: 1,
+        status: 1,
+        dateTime: 1,
+        driver: 1,
+        riders: 1,
+      }
     )
       .then((rides) => {
         if (rides.length > 0) {
           const rideList = rides.map((ride) => {
-            const { dropoffLocation, status, dateTime, riders } = ride;
-            const rider = riders.find((r) => r.riderID === riderId);
-            const { pickupLocation } = rider;
+            const { dropoffLocation, status, dateTime, riders, driver } = ride;
+            const isDriverSameAsRider = driver === riderId;
 
-            return {
-              rideId: ride._id,
-              pickupLocation: pickupLocation.name,
-              dropoffLocation: dropoffLocation.name,
-              dateTime,
-              status,
-            };
+            if (isDriverSameAsRider) {
+              return {
+                rideId: ride._id,
+                riders: riders.map((rider) => ({
+                  riderId: rider.riderID,
+                  pickupLocation: rider.pickupLocation?.name || "",
+                })),
+                dropoffLocation: dropoffLocation?.name || "",
+                dateTime,
+                status,
+              };
+            } else {
+              const rider = riders?.find((r) => r.riderID === riderId);
+              const pickupLocation = rider?.pickupLocation?.name || "";
+
+              return {
+                rideId: ride._id,
+                pickupLocation,
+                dropoffLocation: dropoffLocation?.name || "",
+                dateTime,
+                status,
+              };
+            }
           });
 
           resolve(rideList);

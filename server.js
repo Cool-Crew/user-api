@@ -152,16 +152,20 @@ app.get(
   }
 );
 
-app.get("/api/rides", (req, res) => {
-  rideService
-    .getRide()
-    .then((rides) => {
-      res.json({ message: "rides", _rides: rides });
-    })
-    .catch((err) => {
-      res.status(500).json({ message: `unable to retreive rides\n${err}` });
-    });
-});
+app.get(
+  "/api/rides",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .getRide()
+      .then((rides) => {
+        res.json({ message: "rides", _rides: rides });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: `unable to retreive rides\n${err}` });
+      });
+  }
+);
 
 app.get(
   "/api/userRides/:riderId",
