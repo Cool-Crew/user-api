@@ -176,14 +176,14 @@ module.exports.cancelRide = function (rideId) {
         if (!ride) {
           reject("Ride not found");
         } else {
-          // Check if there is only one rider or driver
           if (
-            (ride.riders.length === 1 && ride.driver === null) ||
+            (ride.riders.length === 1 && ride.driver == undefined) ||
             (ride.riders.length === 0 && ride.driver !== null)
           ) {
             ride.status = "Cancelled";
             return ride.save();
           } else {
+            console.log("More than one rider is already here")
             reject("Ride cannot be cancelled");
           }
         }
