@@ -159,19 +159,32 @@ module.exports.registerRide = function (rideData) {
 
 module.exports.cancelRide = function (rideId) {
   return new Promise(function (resolve, reject) {
-    Ride.findByIdAndUpdate(rideId, { status: "Cancelled" }, { new: true })
+    Ride.findById(rideId)
       .then((ride) => {
         if (!ride) {
           reject("Ride not found");
         } else {
-          resolve("Ride has been cancelled");
+          // Check if there is only one rider or driver
+          if (
+            (ride.riders.length === 1 && ride.driver === null) ||
+            (ride.riders.length === 0 && ride.driver !== null)
+          ) {
+            ride.status = "Cancelled";
+            return ride.save();
+          } else {
+            reject("Ride cannot be cancelled");
+          }
         }
+      })
+      .then(() => {
+        resolve("Ride has been cancelled");
       })
       .catch((err) => {
         reject("There was an error cancelling the ride: " + err);
       });
   });
 };
+
 
 module.exports.addRiderToRide = function (rideId, riderData) {
   return new Promise(function (resolve, reject) {
