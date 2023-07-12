@@ -155,3 +155,24 @@ module.exports.addNotification = function (userId, notificationData) {
       });
   });
 };
+
+module.exports.getUsernames = function (userIds) {
+  return new Promise((resolve, reject) => {
+    const query = { _id: { $in: userIds } };
+    const projection = { _id: 1, username: 1 };
+
+    User.find(query, projection)
+      .exec()
+      .then((users) => {
+        const transformedData = users.reduce((obj, item) => {
+          obj[item._id] = item.username;
+          return obj;
+        }, {});
+        console.log(transformedData);
+        resolve(transformedData);
+      })
+      .catch((err) => {
+        reject("Unable to find users");
+      });
+  });
+};
