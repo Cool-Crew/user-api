@@ -154,7 +154,7 @@ app.get(
 
 app.get(
   "/api/rides",
-  //passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     rideService
       .getRide()
