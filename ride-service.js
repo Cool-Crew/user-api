@@ -177,7 +177,7 @@ module.exports.cancelRide = function (rideId) {
           reject("Ride not found");
         } else {
           if (
-            (ride.riders.length === 1 && ride.driver == undefined) ||
+            (ride.riders.length >= 1 && ride.driver == undefined) ||
             (ride.riders.length === 0 && ride.driver !== null)
           ) {
             ride.status = "Cancelled";
