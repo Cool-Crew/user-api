@@ -1,3 +1,4 @@
+const { getUsernames } = require("./user-service");
 const mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
 const bcrypt = require("bcryptjs");
@@ -86,9 +87,9 @@ module.exports.getRide = async (rideId = null) => {
   }
 };
 
-module.exports.getRidesOfUser = (riderId) => {
-  return new Promise((resolve, reject) => {
-    Ride.find(
+module.exports.getRidesOfUser = async (riderId) => {
+  try {
+    const rides = await Ride.find(
       {
         $or: [{ "riders.riderID": riderId }, { driver: riderId }],
       },
@@ -100,47 +101,58 @@ module.exports.getRidesOfUser = (riderId) => {
         driver: 1,
         riders: 1,
       }
-    )
-      .then((rides) => {
-        if (rides.length > 0) {
-          const rideList = rides.map((ride) => {
-            const { dropoffLocation, status, dateTime, riders, driver } = ride;
-            const isDriverSameAsRider = driver === riderId;
+    );
 
-            if (isDriverSameAsRider) {
+    if (rides.length > 0) {
+      const rideList = await Promise.all(
+        rides.map(async (ride) => {
+          const { dropoffLocation, status, dateTime, riders, driver } = ride;
+          const isDriverSameAsRider = driver === riderId;
+          const retVal = {
+            rideId: ride._id,
+            dropoffLocation: dropoffLocation?.name || "",
+            dateTime,
+            status,
+          };
+          if (isDriverSameAsRider) {
+            if (riders.length === 0) {
               return {
-                rideId: ride._id,
-                riders: riders.map((rider) => ({
-                  riderId: rider.riderID,
-                  pickupLocation: rider.pickupLocation?.name || "",
-                })),
-                dropoffLocation: dropoffLocation?.name || "",
-                dateTime,
-                status,
+                riders: [],
+                ...retVal,
               };
             } else {
-              const rider = riders?.find((r) => r.riderID === riderId);
-              const pickupLocation = rider?.pickupLocation?.name || "";
-
+              const riderIDs = riders.map((rider) => rider.riderID);
+              const usernameList = await getUsernames(riderIDs);
               return {
-                rideId: ride._id,
-                pickupLocation,
-                dropoffLocation: dropoffLocation?.name || "",
-                dateTime,
-                status,
+                riders: riders.map((rider) => ({
+                  riderId: usernameList[rider.riderID],
+                  pickupLocation: rider.pickupLocation?.name || "",
+                })),
+                ...retVal,
               };
             }
-          });
+          } else {
+            const rider = riders?.find((r) => r.riderID === riderId);
+            const pickupLocation = rider?.pickupLocation?.name || "";
+            const driverName = driver
+              ? await getUsernames([driver])
+              : undefined;
+            return {
+              pickupLocation,
+              driverName: driverName ? driverName[driver] : undefined,
+              ...retVal,
+            };
+          }
+        })
+      );
 
-          resolve(rideList);
-        } else {
-          resolve([]);
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+      return rideList;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports.registerRide = function (rideData) {
