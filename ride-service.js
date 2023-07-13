@@ -169,6 +169,18 @@ module.exports.registerRide = function (rideData) {
   });
 };
 
+module.exports.updateRide = function (rideId, updatedData) {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(rideId, updatedData, { new: true }, (err) => {
+      if (err) {
+        reject("There was an error updating the ride: " + err);
+      } else {
+        resolve("Ride " + rideId + " updated.");
+      }
+    });
+  });
+};
+
 module.exports.cancelRide = function (rideId) {
   return new Promise(function (resolve, reject) {
     Ride.findById(rideId)
@@ -183,7 +195,7 @@ module.exports.cancelRide = function (rideId) {
             ride.status = "Cancelled";
             return ride.save();
           } else {
-            console.log("More than one rider is already here")
+            console.log("More than one rider is already here");
             reject("Ride cannot be cancelled");
           }
         }
@@ -196,7 +208,6 @@ module.exports.cancelRide = function (rideId) {
       });
   });
 };
-
 
 module.exports.addRiderToRide = function (rideId, riderData) {
   return new Promise(function (resolve, reject) {
