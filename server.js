@@ -315,6 +315,39 @@ app.post(
   }
 );
 
+// To Remove Notification By ID
+app.delete(
+  "/api/notifications/:userId/:notificationId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+    const notificationId = req.params.notificationId;
+
+    userService
+      .removeNotification(userId, notificationId)
+      .then(() => {
+        res.json({ message: "Notification removed successfully" });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
+//To clear all the notifications
+app.delete("/api/notifications/:userId", passport.authenticate("jwt", { session: false }), (req, res) => {
+  const userId = req.params.userId;
+
+  userService
+    .clearNotifications(userId)
+    .then(() => {
+      res.json({ message: "Notifications cleared successfully" });
+    })
+    .catch((err) => {
+      res.status(500).json({ message: "Error clearing notifications" });
+    });
+});
+
 Promise.all([userService.connect(), rideService.connect()])
   .then(() => {
     app.listen(HTTP_PORT, () => {
