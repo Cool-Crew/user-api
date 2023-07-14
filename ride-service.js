@@ -183,8 +183,7 @@ module.exports.cancelRide = function (rideId) {
             ride.status = "Cancelled";
             return ride.save();
           } else {
-            console.log("More than one rider is already here")
-            reject("Ride cannot be cancelled");
+            reject("Ride cannot be cancelled, Has more than 1 participants");
           }
         }
       })
