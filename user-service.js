@@ -156,6 +156,60 @@ module.exports.addNotification = function (userId, notificationData) {
   });
 };
 
+module.exports.removeNotification = function (userId, notificationId) {
+  return new Promise(function (resolve, reject) {
+    User.findById(userId)
+      .exec()
+      .then((user) => {        
+        console.log(`Notification - ${notificationId} was requested to be removed.`)
+        const notificationIndex = user.notifications.findIndex(
+          (notification) => notification.msg === notificationId
+        );
+        console.log(notificationIndex);
+        if (notificationIndex !== -1) {
+          user.notifications.splice(notificationIndex, 1);
+                    
+          user.save((err) => {
+            if (err) {
+              console.log("Unable to remove notification")
+              reject("Unable to remove notification");
+            } else {
+              console.log("Notification removed successfully")
+              resolve("Notification removed successfully");
+            }
+          });
+        } else {
+          console.log("Notification not found");
+          reject("Notification not found");
+        }
+      })
+      .catch((err) => {
+        console.log("Unable to find user");
+        reject("Unable to find user");
+      });
+  });
+};
+
+module.exports.clearNotifications = function (userId) {
+  return new Promise(function (resolve, reject) {
+    User.findById(userId)
+      .exec()
+      .then((user) => {
+        user.notifications = [];
+        user.save((err) => {
+          if (err) {
+            reject("Unable to clear notifications");
+          } else {
+            resolve("Notifications cleared successfully");
+          }
+        });
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
+};
+
 module.exports.getUsernames = function (userIds) {
   return new Promise((resolve, reject) => {
     const query = { _id: { $in: userIds } };

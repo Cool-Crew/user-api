@@ -204,6 +204,23 @@ app.post(
   }
 );
 
+app.post(
+  "/api/rides/:rideId/driver",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .addDriverToRide(req.body?.ride, req.body?.newDriver)
+      .then(() => {
+        res.json({
+          message: `Driver has been added to ride: ${req.body?.ride}`,
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
 //Cancelling ride
 app.patch(
   "/api/rides/:rideId/cancel",
@@ -220,19 +237,23 @@ app.patch(
   }
 );
 
-app.post(
-  "/api/rides/:rideId/driver",
+app.put(
+  "/api/ride-update",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    console.log("Received update request with data:", req.body);
     rideService
-      .addDriverToRide(req.body?.ride, req.body?.newDriver)
-      .then(() => {
+      .updateRide(req.body.rideId, req.body.updatedData)
+      .then((updatedRide) => {
         res.json({
-          message: `Driver has been added to ride: ${req.body?.ride}`,
+          message: updatedRide,
         });
       })
       .catch((err) => {
-        res.status(422).json({ message: err });
+        console.error("Error updating ride:", err);
+        res.status(500).json({
+          message: "An error occurred while updating ride information",
+        });
       });
   }
 );
@@ -253,6 +274,19 @@ app.delete(
       });
   }
 );
+app.put("/rides/:id", (req, res) => {
+  const rideId = req.params.id;
+  const updatedData = req.body;
+
+  rideService
+    .updateRide(rideId, updatedData)
+    .then((updatedRide) => {
+      res.json(updatedRide);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Failed to update ride: " + error });
+    });
+});
 
 app.delete(
   "/api/rides/:rideId/riders/:riderId",
@@ -311,6 +345,43 @@ app.post(
       })
       .catch((err) => {
         res.status(422).json({ message: err });
+      });
+  }
+);
+
+// To Remove Notification By ID
+app.delete(
+  "/api/notifications/:userId/:notificationId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+    const notificationId = req.params.notificationId;
+
+    userService
+      .removeNotification(userId, notificationId)
+      .then(() => {
+        res.json({ message: "Notification removed successfully" });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
+//To clear all the notifications
+app.delete(
+  "/api/notifications/:userId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+
+    userService
+      .clearNotifications(userId)
+      .then(() => {
+        res.json({ message: "Notifications cleared successfully" });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: "Error clearing notifications" });
       });
   }
 );
