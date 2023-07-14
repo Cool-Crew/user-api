@@ -100,19 +100,33 @@ module.exports.getRidesOfUser = async (riderId) => {
         dateTime: 1,
         driver: 1,
         riders: 1,
+        feedback: 1,
       }
     );
 
     if (rides.length > 0) {
       const rideList = await Promise.all(
         rides.map(async (ride) => {
-          const { dropoffLocation, status, dateTime, riders, driver } = ride;
+          const {
+            dropoffLocation,
+            status,
+            dateTime,
+            riders,
+            driver,
+            feedback,
+          } = ride;
+          const item =
+            feedback.length > 0
+              ? feedback.find((item) => item.riderId === riderId)
+              : undefined;
           const isDriverSameAsRider = driver === riderId;
           const retVal = {
             rideId: ride._id,
             dropoffLocation: dropoffLocation?.name || "",
             dateTime,
             status,
+            rating: item?.rating || undefined,
+            feedback: item?.feedback || undefined,
           };
           if (isDriverSameAsRider) {
             if (riders.length === 0) {

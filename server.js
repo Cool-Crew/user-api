@@ -204,6 +204,23 @@ app.post(
   }
 );
 
+app.post(
+  "/api/rides/:rideId/driver",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .addDriverToRide(req.body?.ride, req.body?.newDriver)
+      .then(() => {
+        res.json({
+          message: `Driver has been added to ride: ${req.body?.ride}`,
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
 //Cancelling ride
 app.patch(
   "/api/rides/:rideId/cancel",
