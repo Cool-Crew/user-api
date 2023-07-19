@@ -294,6 +294,71 @@ module.exports.addFeedbackToRide = (rideId, userId, rating, feedback) => {
   });
 };
 
+module.exports.getAllFeedback = () => {
+  return new Promise((resolve, reject) => {
+    Ride.find()
+      .exec()
+      .then((rides) => {
+        const userIds = [];
+        const feedbackList = [];
+
+        rides.forEach((ride) => {
+          if (ride.driver) {
+            userIds.push(ride.driver);
+          }
+          if (ride.creator) {
+            userIds.push(ride.creator);
+          }
+
+          ride.feedback.forEach((fb) => {
+            if (fb.riderId) {
+              userIds.push(fb.riderId);
+            }
+            const rider = ride.riders.find((rider) => rider.riderID === fb.riderId)
+            const feedback = {
+              rideId: ride._id,
+              driver: ride.driver ? ride.driver : "No driver",
+              creator: ride.creator ? ride.creator : "Unknown",
+              rider: fb.riderId ? fb.riderId : "Unknown",
+              rating: fb.rating,
+              feedback: fb.feedback,
+              dateTime: ride.dateTime,
+              dropoffLocation: ride.dropoffLocation.name,
+              pickupLocation: rider ? rider.pickupLocation.name : "",
+            };
+            feedbackList.push(feedback);
+          });
+        });
+
+        if (userIds.length > 0) {
+          getUsernames(userIds)
+            .then((usernames) => {
+              feedbackList.forEach((feedback) => {
+                if (feedback.rider && usernames[feedback.rider]) {
+                  feedback.rider = usernames[feedback.rider];
+                }
+                if (feedback.driver && usernames[feedback.driver]) {
+                  feedback.driver = usernames[feedback.driver];
+                }
+                if (feedback.creator && usernames[feedback.creator]) {
+                  feedback.creator = usernames[feedback.creator];
+                }
+              });
+              resolve(feedbackList);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        } else {
+          resolve(feedbackList);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 module.exports.rmDriverToRide = (rideId) => {
   return new Promise(function (resolve, reject) {
     Ride.findByIdAndUpdate(

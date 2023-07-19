@@ -329,6 +329,22 @@ app.post(
   }
 );
 
+// Feedback List
+app.get(
+  "/api/feedbacks",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .getAllFeedback()
+      .then((feedbacks) => {
+        res.json({ message: "Feedbacks", _feedback: feedbacks });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: `unable to retrieve feedbacks\n${err}` });
+      });
+  }
+);
+
 //Notifications
 
 app.post(
