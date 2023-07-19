@@ -396,3 +396,19 @@ module.exports.removeRiderFromRide = function (rideId, riderId) {
       });
   });
 };
+
+module.exports.getRideDetails=  function (rideId) {
+  return new Promise(function (resolve, reject) {
+    Ride.find({'riders.rideId':rideId})
+      .then((ride) => {
+        if (!ride) {
+          reject("Ride not found");
+        } else {
+          resolve("Rider removed from the ride");
+        }
+      })
+      .catch((err) => {
+        reject("There was an error removing the rider: " + err);
+      });
+  });
+};

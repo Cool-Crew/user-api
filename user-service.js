@@ -57,6 +57,7 @@ module.exports.connect = function () {
   });
 };
 
+
 module.exports.registerUser = function (userData) {
   return new Promise(function (resolve, reject) {
     bcrypt
@@ -104,6 +105,7 @@ module.exports.checkUser = function (userData) {
 };
 
 module.exports.getUserById = function (userId) {
+  // console.log("user id =====>",userId)
   return new Promise(function (resolve, reject) {
     User.findById(userId)
       .exec()
@@ -160,21 +162,23 @@ module.exports.removeNotification = function (userId, notificationId) {
   return new Promise(function (resolve, reject) {
     User.findById(userId)
       .exec()
-      .then((user) => {        
-        console.log(`Notification - ${notificationId} was requested to be removed.`)
+      .then((user) => {
+        console.log(
+          `Notification - ${notificationId} was requested to be removed.`
+        );
         const notificationIndex = user.notifications.findIndex(
           (notification) => notification.msg === notificationId
         );
         console.log(notificationIndex);
         if (notificationIndex !== -1) {
           user.notifications.splice(notificationIndex, 1);
-                    
+
           user.save((err) => {
             if (err) {
-              console.log("Unable to remove notification")
+              console.log("Unable to remove notification");
               reject("Unable to remove notification");
             } else {
-              console.log("Notification removed successfully")
+              console.log("Notification removed successfully");
               resolve("Notification removed successfully");
             }
           });
@@ -230,3 +234,22 @@ module.exports.getUsernames = function (userIds) {
       });
   });
 };
+
+module.exports.getUsers = function (userId) {
+  return new Promise(function (resolve, reject) {
+    User.find()
+      .exec()
+      .then((user) => {
+        if (user) {
+          resolve(user);
+        } else {
+          reject("User not found");
+        }
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
+};
+
+// module.exports = User;
