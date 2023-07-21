@@ -255,9 +255,9 @@ module.exports.addRiderToRide = function (rideId, riderData) {
           riders: {
             riderID: riderData.riderID,
             pickupLocation: {
-              address: riderData.pickupLocation.address,
-              location: riderData.pickupLocation.location,
-              name: riderData.pickupLocation.name,
+              address: riderData.pickupLocation.puLocation.address,
+              location: riderData.pickupLocation.puLocation.location,
+              name: riderData.pickupLocation.puLocation.name,
             },
           },
         },
