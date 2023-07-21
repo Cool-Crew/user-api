@@ -101,6 +101,7 @@ module.exports.getRidesOfUser = async (riderId) => {
         driver: 1,
         riders: 1,
         feedback: 1,
+        creator: 1,
       }
     );
 
@@ -114,6 +115,7 @@ module.exports.getRidesOfUser = async (riderId) => {
             riders,
             driver,
             feedback,
+            creator,
           } = ride;
           const item =
             feedback.length > 0
@@ -127,6 +129,8 @@ module.exports.getRidesOfUser = async (riderId) => {
             status,
             rating: item?.rating || undefined,
             feedback: item?.feedback || undefined,
+            creator,
+            driver,
           };
           if (isDriverSameAsRider) {
             if (riders.length === 0) {
@@ -218,6 +222,26 @@ module.exports.cancelRide = function (rideId) {
       })
       .catch((err) => {
         reject("There was an error cancelling the ride: " + err);
+      });
+  });
+};
+
+module.exports.completeRide = function (rideId) {
+  return new Promise(function (resolve, reject) {
+    Ride.findById(rideId)
+      .then((ride) => {
+        if (!ride) {
+          reject("Ride not found");
+        } else {
+          ride.status = "Complete";
+          return ride.save();
+        }
+      })
+      .then(() => {
+        resolve("Ride has been marked as completed");
+      })
+      .catch((err) => {
+        reject("There was an error updating the ride: " + err);
       });
   });
 };
@@ -314,7 +338,9 @@ module.exports.getAllFeedback = () => {
             if (fb.riderId) {
               userIds.push(fb.riderId);
             }
-            const rider = ride.riders.find((rider) => rider.riderID === fb.riderId)
+            const rider = ride.riders.find(
+              (rider) => rider.riderID === fb.riderId
+            );
             const feedback = {
               rideId: ride._id,
               driver: ride.driver ? ride.driver : "No driver",
@@ -397,9 +423,9 @@ module.exports.removeRiderFromRide = function (rideId, riderId) {
   });
 };
 
-module.exports.getRideDetails=  function (rideId) {
+module.exports.getRideDetails = function (rideId) {
   return new Promise(function (resolve, reject) {
-    Ride.find({'riders.rideId':rideId})
+    Ride.find({ "riders.rideId": rideId })
       .then((ride) => {
         if (!ride) {
           reject("Ride not found");

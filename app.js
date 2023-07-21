@@ -22,7 +22,6 @@ jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme("jwt");
 jwtOptions.secretOrKey = process.env.JWT_SECRET;
 
 var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-
   if (jwt_payload) {
     next(null, { _id: jwt_payload._id, email: jwt_payload.email });
   } else {
@@ -169,11 +168,12 @@ app.get(
   }
 );
 
-app.get("/api/ridedetails/:rideId",
- passport.authenticate("jwt", { session: false }),
+app.get(
+  "/api/ridedetails/:rideId",
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const rideId = req.params.rideId;
-    console.log("ride id ==================>",rideId)
+    console.log("ride id ==================>", rideId);
     rideService
       .getRideDetails(rideId)
       .then((rides) => {
@@ -181,7 +181,9 @@ app.get("/api/ridedetails/:rideId",
       })
       .catch((err) => {
         res.status(500).json({ message: `unable to retreive rides\n${err}` });
-      })});
+      });
+  }
+);
 
 app.get(
   "/api/userRides/:riderId",
@@ -370,11 +372,12 @@ app.get(
         res.json({ message: "Feedbacks", _feedback: feedbacks });
       })
       .catch((err) => {
-        res.status(500).json({ message: `unable to retrieve feedbacks\n${err}` });
+        res
+          .status(500)
+          .json({ message: `unable to retrieve feedbacks\n${err}` });
       });
   }
 );
-
 
 //Notifications
 
@@ -433,6 +436,22 @@ app.delete(
   }
 );
 
+// Ride Completion
+app.patch(
+  "/api/rides/:rideId/markAsCompleted",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .completeRide(req.params.rideId)
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
+
 app.post(
   "/api/room",
   passport.authenticate("jwt", { session: false }),
@@ -450,20 +469,20 @@ app.post(
         group = await chatRoomService.update(rideId, userId);
         res.json({ message: "room ", _room: group });
       } else {
-        group = await chatRoomService.create({ride_id:rideId,members:[userId]});
+        group = await chatRoomService.create({
+          ride_id: rideId,
+          members: [userId],
+        });
         // console.log("group else", group);
         // console.log(group);
         res.json({ message: "room ", _room: group });
       }
     } catch (error) {
-      console.log("error ===>",error)
+      console.log("error ===>", error);
       res.json({ message: "room ", _err: error });
     }
   }
 );
-
-
-
 
 app.post(
   "/api/message",
@@ -471,7 +490,7 @@ app.post(
   async (req, res) => {
     try {
       const { senderId, roomId, message } = req.body;
-      console.log('msg R')
+      console.log("msg R");
       const messages = await messageService.create({
         sender: senderId,
         room_id: roomId,
@@ -541,11 +560,12 @@ app.post(
         const isRoomCreate = await chatRoomService.create({
           members: [senderId, receiverId],
         });
-        res.status(200).json({ message: "room created by  members", _room:isRoomCreate });
-      } else{
+        res
+          .status(200)
+          .json({ message: "room created by  members", _room: isRoomCreate });
+      } else {
         res.status(200).json({ message: "room details", _room: isRoomExists });
       }
-     
     } catch (error) {
       console.log(error);
       res.json({ message: "error ", _err: error });
@@ -578,7 +598,7 @@ Promise.all([
     console.log("user and ride service are connected");
   })
   .catch((err) => {
-    console.log("unable for connect the service "+err);
+    console.log("unable for connect the service " + err);
   });
 
 module.exports = app;
