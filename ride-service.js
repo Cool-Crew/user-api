@@ -449,3 +449,25 @@ module.exports.getRideDetails = function (rideId) {
       });
   });
 };
+
+module.exports.updateRideDetails = function (rideId, interests, classes) {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(
+      rideId,
+      {
+        $addToSet: {
+          riderInterests: { $each: interests },
+          riderClasses: { $each: classes },
+        },
+      },
+      { new: true },
+      (err, updatedRide) => {
+        if (err) {
+          reject("There was an error updating the ride: " + err);
+        } else {
+          resolve("Interests and classes added to the ride.");
+        }
+      }
+    );
+  });
+};

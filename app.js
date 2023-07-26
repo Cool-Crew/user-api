@@ -339,6 +339,28 @@ app.delete(
   }
 );
 
+// Route to add interests and classes to the ride
+app.post(
+  "/api/rides/:rideId/details",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const rideId = req.params.rideId;
+    const interests = req.body.interests || [];
+    const classes = req.body.classes || [];
+
+    rideService
+      .updateRideDetails(rideId, interests, classes)
+      .then(() => {
+        res.json({
+          message: "Interests and classes added to the ride successfully.",
+        });
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
 //Feedback Submission
 app.post(
   "/api/addFeedback/:rideId",
