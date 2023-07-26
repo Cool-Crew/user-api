@@ -1,4 +1,3 @@
-const { getUsernames } = require("./user-service");
 const mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
 const bcrypt = require("bcryptjs");
@@ -32,6 +31,8 @@ const rideSchema = Schema({
     name: { type: String },
   },
   dateTime: { type: Date },
+  riderClasses: [String],
+  riderInterests: [String],
   chat: [
     {
       content: { type: String },
@@ -178,6 +179,7 @@ module.exports.getRidesOfUser = async (riderId) => {
 module.exports.registerRide = function (rideData) {
   return new Promise(function (resolve, reject) {
     let newRide = new Ride(rideData);
+    console.log(rideData);
 
     newRide.save((err) => {
       if (err) {
