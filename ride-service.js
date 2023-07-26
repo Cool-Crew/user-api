@@ -43,6 +43,7 @@ const rideSchema = Schema({
       riderId: { type: String },
       rating: { type: Number },
       feedback: { type: String },
+      category: { type: String },
     },
   ],
   status: {
@@ -129,6 +130,7 @@ module.exports.getRidesOfUser = async (riderId) => {
             status,
             rating: item?.rating || undefined,
             feedback: item?.feedback || undefined,
+            feedbackCategory: item?.category || undefined,
             creator,
             driver,
           };
@@ -292,12 +294,19 @@ module.exports.addDriverToRide = (rideId, driverData) => {
   });
 };
 
-module.exports.addFeedbackToRide = (rideId, userId, rating, feedback) => {
+module.exports.addFeedbackToRide = (
+  rideId,
+  userId,
+  rating,
+  feedback,
+  category
+) => {
   return new Promise(function (resolve, reject) {
     const feedbackData = {
       riderId: userId,
       rating: rating,
       feedback: feedback,
+      category: category,
     };
 
     Ride.findByIdAndUpdate(

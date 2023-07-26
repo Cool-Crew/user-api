@@ -348,8 +348,9 @@ app.post(
     const riderId = req.body.riderId;
     const feedback = req.body.rideFeedback || "";
     const rating = req.body.rideRating;
+    const category = req.body.feedbackCategory || "";
     rideService
-      .addFeedbackToRide(rideId, riderId, rating, feedback)
+      .addFeedbackToRide(rideId, riderId, rating, feedback, category)
       .then(() => {
         res.json({
           message: `Feedback has been added`,
