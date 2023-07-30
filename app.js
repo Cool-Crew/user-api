@@ -115,12 +115,28 @@ app.put(
 );
 
 app.get(
+  "/api/username/:userId",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+    userService
+      .getUsernames(userId)
+      .then((usernames) => {
+        res.json({ message: "usernames", _usernames: usernames });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: `unable to retrieve usernames\n${err}` });
+      });
+  }
+);
+
+app.get(
   "/api/refresh-token",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const userId = req.user._id;
     userService
-      .getUserById(userId)
+      .ById(userId)
       .then((user) => {
         var payload = {
           _id: user._id,
