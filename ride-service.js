@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
 const bcrypt = require("bcryptjs");
+const { getUsernames } = require("./user-service");
 
 let mongoDBConnectionString = process.env.MONGO_URL;
 
