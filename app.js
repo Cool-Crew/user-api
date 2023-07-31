@@ -5,6 +5,7 @@ const passport = require("passport");
 const passportJWT = require("passport-jwt");
 const dotenv = require("dotenv");
 const app = express();
+const moment = require("moment");
 dotenv.config();
 
 const userService = require("./user-service.js");
@@ -125,7 +126,9 @@ app.get(
         res.json({ message: "usernames", _usernames: usernames });
       })
       .catch((err) => {
-        res.status(500).json({ message: `unable to retrieve usernames\n${err}` });
+        res
+          .status(500)
+          .json({ message: `unable to retrieve usernames\n${err}` });
       });
   }
 );
@@ -176,10 +179,47 @@ app.get(
     rideService
       .getRide()
       .then((rides) => {
-        res.json({ message: "rides", _rides: rides });
+        // Filter the rides to check for those that have passed and need to be marked as complete
+        const completedRides = rides.filter((ride) => {
+          if (
+            ride.status !== "Cancelled" &&
+            ride.status !== "Complete" &&
+            moment(ride.dateTime).isBefore(moment()) // Check if the ride's dateTime has passed
+          ) {
+            return true; // Include the ride in the completedRides list
+          }
+          return false; // Exclude the ride from the completedRides list
+        });
+
+        // Update the status of the completed rides to "Complete"
+        const promises = completedRides.map((ride) => {
+          return rideService.completeRide(ride._id); // Mark the ride as complete
+        });
+
+        // Execute all the promises to update the rides in parallel
+        Promise.all(promises)
+          .then(() => {
+            // Fetch all rides again after marking completed ones
+            rideService
+              .getRide()
+              .then((updatedRides) => {
+                res.json({
+                  message: "Rides fetched successfully",
+                  _rides: updatedRides,
+                });
+              })
+              .catch((err) => {
+                res
+                  .status(500)
+                  .json({ message: `Unable to retrieve rides: ${err}` });
+              });
+          })
+          .catch((err) => {
+            res.status(500).json({ message: `Unable to update rides: ${err}` });
+          });
       })
       .catch((err) => {
-        res.status(500).json({ message: `unable to retreive rides\n${err}` });
+        res.status(500).json({ message: `Unable to retrieve rides: ${err}` });
       });
   }
 );
