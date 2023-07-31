@@ -191,9 +191,9 @@ app.get(
     const rideId = req.params.rideId;
     console.log("ride id ==================>", rideId);
     rideService
-      .getRideDetails(rideId)
-      .then((rides) => {
-        res.json({ message: "rides", _rides: rides });
+      .getRide(rideId)
+      .then((ride) => {
+        res.json({ message: "ride details", _ride: ride });
       })
       .catch((err) => {
         res.status(500).json({ message: `unable to retreive rides\n${err}` });
