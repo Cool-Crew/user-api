@@ -189,7 +189,6 @@ app.get(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const rideId = req.params.rideId;
-    console.log("ride id ==================>", rideId);
     rideService
       .getRide(rideId)
       .then((ride) => {
