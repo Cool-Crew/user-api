@@ -50,10 +50,24 @@ const rideSchema = Schema({
   ],
   status: {
     type: String,
-    enum: ["Not_Started", "In_Progress", "Complete", "Cancelled"],
+    enum: [
+      "Not_Started",
+      "In_Progress",
+      "Complete",
+      "Cancelled",
+      "Not_Completed",
+    ],
     default: "Not_Started",
   },
 });
+
+rideSchema.methods.updateStatus = function () {
+  if (this.dateTime < new Date()) {
+    this.status = "Not_Completed";
+    return this.save();
+  }
+  return Promise.resolve();
+};
 
 let Ride;
 
@@ -69,10 +83,30 @@ module.exports.connect = function () {
 
     db.once("open", () => {
       Ride = db.model("rides", rideSchema);
+      await updateRideStatuses();
+
+      // Execute the code at regular intervals
+      setInterval(async () => {
+        await updateRideStatuses();
+      }, 3600000); 
       resolve();
     });
   });
 };
+
+async function updateRideStatuses() {
+  try {
+    const rides = await Ride.find({
+      status: { $nin: ["Complete", "Cancelled", "Not_Completed"] },
+    }).exec();
+
+    for (const ride of rides) {
+      await ride.updateStatus();
+    }
+  } catch (error) {
+    console.error("Error updating ride statuses:", error);
+  }
+}
 
 module.exports.getRide = async (rideId = null) => {
   var rides;
