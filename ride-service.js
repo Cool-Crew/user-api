@@ -81,14 +81,14 @@ module.exports.connect = function () {
       reject(err);
     });
 
-    db.once("open", () => {
+    db.once("open", async () => {
       Ride = db.model("rides", rideSchema);
       await updateRideStatuses();
 
       // Execute the code at regular intervals
       setInterval(async () => {
         await updateRideStatuses();
-      }, 3600000); 
+      }, 3600000);
       resolve();
     });
   });
