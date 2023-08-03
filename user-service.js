@@ -36,6 +36,7 @@ let userSchema = new Schema({
       },
     },
   ],
+  isIssueReported: Boolean,
 });
 
 let User;

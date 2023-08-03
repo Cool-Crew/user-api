@@ -59,6 +59,29 @@ const rideSchema = Schema({
     ],
     default: "Not_Started",
   },
+  issue: {
+    type: {
+      description: { type: String },
+      openedBy: { type: String },
+      priority: { type: String },
+      category: {
+        type: String,
+        enum: [
+          "Driver_Behavior",
+          "Vehicle_Condition",
+          "Travel_Delay",
+          "Technical_Issue",
+          "Other",
+        ],
+        default: "Other",
+      },
+      issueDate: { type: Date },
+      issueTime: { type: String },
+      amPmOption: { type: String },
+      affectedPassengers: { type: Boolean },
+    },
+    default: null,
+  },
 });
 
 rideSchema.methods.updateStatus = function () {
@@ -330,6 +353,30 @@ module.exports.addDriverToRide = (rideId, driverData) => {
     );
   });
 };
+
+
+module.exports.addIssueToRide = (rideId, issue) => {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(
+      rideId,
+      { $push: { issue: issue } },
+      { new: true }
+    )
+      .then((updatedRide) => {
+        if (updatedRide) {
+          resolve(updatedRide);
+          console.log("The issue data was pushed to issue object and ride was updated");
+          console.log(Ride);
+        } else {
+          reject(new Error("Ride not found"));
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
+
 
 module.exports.addFeedbackToRide = (
   rideId,

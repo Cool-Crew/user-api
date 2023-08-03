@@ -81,10 +81,11 @@ app.post("/api/login", (req, res) => {
         classes: user.classes,
         interests: user.interests,
         notifications: user.notifications,
+        isIssueReported: user.isIssueReported,
       };
 
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
-
+      //console.log(payload);
       res.json({ message: "login successful", token: token });
     })
     .catch((msg) => {
@@ -138,7 +139,7 @@ app.get(
   (req, res) => {
     const userId = req.user._id;
     userService
-      .ById(userId)
+      .getUserById(userId)
       .then((user) => {
         var payload = {
           _id: user._id,
@@ -150,9 +151,11 @@ app.get(
           classes: user.classes,
           interests: user.interests,
           notifications: user.notifications,
+          isIssueReported: user.isIssueReported,
         };
         var token = jwt.sign(payload, jwtOptions.secretOrKey);
         res.json({ message: "refreshed token", token: token });
+        //console.log(payload);
       })
       .catch((err) => {
         console.error("Error retrieving user:", err);
@@ -640,5 +643,37 @@ Promise.all([
   .catch((err) => {
     console.log("unable for connect the service " + err);
   });
+
+
+app.post(
+  "/api/rides/:rideId/report-issue",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    console.log("We are in the correct function.")
+    const rideId = req.params.rideId;
+    const issue = {
+      description: req.body.description || "",
+      category: req.body.category || "Other",
+      openedBy: req.body.openedBy,
+      priority: req.body.priority,
+      issueDate: req.body.issueDate,
+      issueTime: req.body.issueTime,
+      amPmOption: req.body.amPmOption,
+      affectedPassengers: req.body.affectedPassengers
+    };
+    rideService
+      .addIssueToRide(rideId, issue)
+      .then(() => {
+        res.json({
+          message: `Issue has been reported for the ride`,
+        });
+        console.log(`The newly updated ride schema after issue addition: ${rideService}`)
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
+
 
 module.exports = app;
