@@ -516,9 +516,9 @@ app.get(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const userId = req.params.userId;
-    console.log('hey you are getting matching info');
+    console.log("hey you are getting matching info");
     userService
-      .getMatchingInfo(userId)
+      .getUserMatchInfo(userId)
       .then((matchingInfo) => {
         res.json({ message: "Matching Info", _matchingInfo: matchingInfo });
       })
@@ -527,7 +527,6 @@ app.get(
       });
   }
 );
-
 
 app.post(
   "/api/room",
