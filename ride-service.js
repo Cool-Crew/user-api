@@ -360,6 +360,7 @@ module.exports.getAllFeedback = () => {
               rider: fb.riderId ? fb.riderId : "Unknown",
               rating: fb.rating,
               feedback: fb.feedback,
+              category: fb.category,
               dateTime: ride.dateTime,
               dropoffLocation: ride.dropoffLocation.name,
               pickupLocation: rider ? rider.pickupLocation.name : "",
