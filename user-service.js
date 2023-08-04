@@ -78,8 +78,7 @@ module.exports.getUserMatchInfo = (userId) => {
         reject("Unable to find user");
       });
   });
-}
-
+};
 
 module.exports.registerUser = function (userData) {
   return new Promise(function (resolve, reject) {
@@ -166,7 +165,17 @@ module.exports.addNotification = function (userId, notificationData) {
     User.findById(userId)
       .exec()
       .then((user) => {
+        // Limit the number of notifications to, for example, 10
+        const maxNotifications = 15;
+
+        if (user.notifications.length >= maxNotifications) {
+          // Remove the earliest notification to make space for the new one
+          user.notifications.shift();
+        }
+
+        // Add the new notification
         user.notifications.push(notificationData);
+
         user.save((err) => {
           if (err) {
             reject("Unable to add notification");
