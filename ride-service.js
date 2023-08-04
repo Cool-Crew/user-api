@@ -288,19 +288,19 @@ module.exports.cancelRide = function (rideId) {
   });
 };
 
-module.exports.completeRide = function (rideId) {
+module.exports.changeRideStatus = function (rideId, status) {
   return new Promise(function (resolve, reject) {
     Ride.findById(rideId)
       .then((ride) => {
         if (!ride) {
           reject("Ride not found");
         } else {
-          ride.status = "Complete";
+          ride.status = status;
           return ride.save();
         }
       })
       .then(() => {
-        resolve("Ride has been marked as completed");
+        resolve(`Ride has been marked as ${status}`);
       })
       .catch((err) => {
         reject("There was an error updating the ride: " + err);
@@ -354,18 +354,15 @@ module.exports.addDriverToRide = (rideId, driverData) => {
   });
 };
 
-
 module.exports.addIssueToRide = (rideId, issue) => {
   return new Promise(function (resolve, reject) {
-    Ride.findByIdAndUpdate(
-      rideId,
-      { $push: { issue: issue } },
-      { new: true }
-    )
+    Ride.findByIdAndUpdate(rideId, { $push: { issue: issue } }, { new: true })
       .then((updatedRide) => {
         if (updatedRide) {
           resolve(updatedRide);
-          console.log("The issue data was pushed to issue object and ride was updated");
+          console.log(
+            "The issue data was pushed to issue object and ride was updated"
+          );
           console.log(Ride);
         } else {
           reject(new Error("Ride not found"));
@@ -376,7 +373,6 @@ module.exports.addIssueToRide = (rideId, issue) => {
       });
   });
 };
-
 
 module.exports.addFeedbackToRide = (
   rideId,

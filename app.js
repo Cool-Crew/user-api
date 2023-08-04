@@ -485,7 +485,22 @@ app.patch(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     rideService
-      .completeRide(req.params.rideId)
+      .changeRideStatus(req.params.rideId, "Complete")
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
+
+app.patch(
+  "/api/rides/:rideId/startRide",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .changeRideStatus(req.params.rideId, "In_Progress")
       .then((msg) => {
         res.json({ message: msg });
       })
@@ -644,12 +659,11 @@ Promise.all([
     console.log("unable for connect the service " + err);
   });
 
-
 app.post(
   "/api/rides/:rideId/report-issue",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    console.log("We are in the correct function.")
+    console.log("We are in the correct function.");
     const rideId = req.params.rideId;
     const issue = {
       description: req.body.description || "",
@@ -659,7 +673,7 @@ app.post(
       issueDate: req.body.issueDate,
       issueTime: req.body.issueTime,
       amPmOption: req.body.amPmOption,
-      affectedPassengers: req.body.affectedPassengers
+      affectedPassengers: req.body.affectedPassengers,
     };
     rideService
       .addIssueToRide(rideId, issue)
@@ -667,13 +681,14 @@ app.post(
         res.json({
           message: `Issue has been reported for the ride`,
         });
-        console.log(`The newly updated ride schema after issue addition: ${rideService}`)
+        console.log(
+          `The newly updated ride schema after issue addition: ${rideService}`
+        );
       })
       .catch((err) => {
         res.status(422).json({ message: err });
       });
   }
 );
-
 
 module.exports = app;
