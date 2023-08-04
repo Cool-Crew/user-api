@@ -510,6 +510,25 @@ app.patch(
   }
 );
 
+//getting user matching info (interests and classes)
+app.get(
+  "/api/users/:userId/matchingInfo",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    const userId = req.params.userId;
+    console.log('hey you are getting matching info');
+    userService
+      .getMatchingInfo(userId)
+      .then((matchingInfo) => {
+        res.json({ message: "Matching Info", _matchingInfo: matchingInfo });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: err });
+      });
+  }
+);
+
+
 app.post(
   "/api/room",
   passport.authenticate("jwt", { session: false }),

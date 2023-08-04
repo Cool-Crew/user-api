@@ -58,6 +58,28 @@ module.exports.connect = function () {
   });
 };
 
+// getting user interests and classes
+module.exports.getUserMatchInfo = (userId) => {
+  return new Promise((resolve, reject) => {
+    User.findById(userId)
+      .exec()
+      .then((user) => {
+        if (user) {
+          resolve({
+            id: user._id,
+            classes: user.classes,
+            interests: user.interests,
+          });
+        } else {
+          reject("User not found");
+        }
+      })
+      .catch((err) => {
+        reject("Unable to find user");
+      });
+  });
+}
+
 
 module.exports.registerUser = function (userData) {
   return new Promise(function (resolve, reject) {
