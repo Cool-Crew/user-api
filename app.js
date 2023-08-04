@@ -5,7 +5,6 @@ const passport = require("passport");
 const passportJWT = require("passport-jwt");
 const dotenv = require("dotenv");
 const app = express();
-const moment = require("moment");
 dotenv.config();
 
 const userService = require("./user-service.js");
@@ -82,10 +81,11 @@ app.post("/api/login", (req, res) => {
         classes: user.classes,
         interests: user.interests,
         notifications: user.notifications,
+        isIssueReported: user.isIssueReported,
       };
 
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
-
+      //console.log(payload);
       res.json({ message: "login successful", token: token });
     })
     .catch((msg) => {
@@ -139,7 +139,7 @@ app.get(
   (req, res) => {
     const userId = req.user._id;
     userService
-      .ById(userId)
+      .getUserById(userId)
       .then((user) => {
         var payload = {
           _id: user._id,
@@ -151,9 +151,11 @@ app.get(
           classes: user.classes,
           interests: user.interests,
           notifications: user.notifications,
+          isIssueReported: user.isIssueReported,
         };
         var token = jwt.sign(payload, jwtOptions.secretOrKey);
         res.json({ message: "refreshed token", token: token });
+        //console.log(payload);
       })
       .catch((err) => {
         console.error("Error retrieving user:", err);
@@ -179,44 +181,7 @@ app.get(
     rideService
       .getRide()
       .then((rides) => {
-        // Filter the rides to check for those that have passed and need to be marked as complete
-        const completedRides = rides.filter((ride) => {
-          if (
-            ride.status !== "Cancelled" &&
-            ride.status !== "Complete" &&
-            moment(ride.dateTime).isBefore(moment()) // Check if the ride's dateTime has passed
-          ) {
-            return true; // Include the ride in the completedRides list
-          }
-          return false; // Exclude the ride from the completedRides list
-        });
-
-        // Update the status of the completed rides to "Complete"
-        const promises = completedRides.map((ride) => {
-          return rideService.completeRide(ride._id); // Mark the ride as complete
-        });
-
-        // Execute all the promises to update the rides in parallel
-        Promise.all(promises)
-          .then(() => {
-            // Fetch all rides again after marking completed ones
-            rideService
-              .getRide()
-              .then((updatedRides) => {
-                res.json({
-                  message: "Rides fetched successfully",
-                  _rides: updatedRides,
-                });
-              })
-              .catch((err) => {
-                res
-                  .status(500)
-                  .json({ message: `Unable to retrieve rides: ${err}` });
-              });
-          })
-          .catch((err) => {
-            res.status(500).json({ message: `Unable to update rides: ${err}` });
-          });
+        res.json({ message: "rides", _rides: rides });
       })
       .catch((err) => {
         res.status(500).json({ message: `Unable to retrieve rides: ${err}` });
@@ -520,7 +485,22 @@ app.patch(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     rideService
-      .completeRide(req.params.rideId)
+      .changeRideStatus(req.params.rideId, "Complete")
+      .then((msg) => {
+        res.json({ message: msg });
+      })
+      .catch((msg) => {
+        res.status(422).json({ message: msg });
+      });
+  }
+);
+
+app.patch(
+  "/api/rides/:rideId/startRide",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    rideService
+      .changeRideStatus(req.params.rideId, "In_Progress")
       .then((msg) => {
         res.json({ message: msg });
       })
@@ -678,5 +658,37 @@ Promise.all([
   .catch((err) => {
     console.log("unable for connect the service " + err);
   });
+
+app.post(
+  "/api/rides/:rideId/report-issue",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    console.log("We are in the correct function.");
+    const rideId = req.params.rideId;
+    const issue = {
+      description: req.body.description || "",
+      category: req.body.category || "Other",
+      openedBy: req.body.openedBy,
+      priority: req.body.priority,
+      issueDate: req.body.issueDate,
+      issueTime: req.body.issueTime,
+      amPmOption: req.body.amPmOption,
+      affectedPassengers: req.body.affectedPassengers,
+    };
+    rideService
+      .addIssueToRide(rideId, issue)
+      .then(() => {
+        res.json({
+          message: `Issue has been reported for the ride`,
+        });
+        console.log(
+          `The newly updated ride schema after issue addition: ${rideService}`
+        );
+      })
+      .catch((err) => {
+        res.status(422).json({ message: err });
+      });
+  }
+);
 
 module.exports = app;

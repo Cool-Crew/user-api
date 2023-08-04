@@ -50,10 +50,47 @@ const rideSchema = Schema({
   ],
   status: {
     type: String,
-    enum: ["Not_Started", "In_Progress", "Complete", "Cancelled"],
+    enum: [
+      "Not_Started",
+      "In_Progress",
+      "Complete",
+      "Cancelled",
+      "Not_Completed",
+    ],
     default: "Not_Started",
   },
+  issue: {
+    type: {
+      description: { type: String },
+      openedBy: { type: String },
+      priority: { type: String },
+      category: {
+        type: String,
+        enum: [
+          "Driver_Behavior",
+          "Vehicle_Condition",
+          "Travel_Delay",
+          "Technical_Issue",
+          "Other",
+        ],
+        default: "Other",
+      },
+      issueDate: { type: Date },
+      issueTime: { type: String },
+      amPmOption: { type: String },
+      affectedPassengers: { type: Boolean },
+    },
+    default: null,
+  },
 });
+
+rideSchema.methods.updateStatus = function () {
+  if (this.dateTime < new Date()) {
+    this.status = "Not_Completed";
+    return this.save();
+  }
+  return Promise.resolve();
+};
 
 let Ride;
 
@@ -67,12 +104,32 @@ module.exports.connect = function () {
       reject(err);
     });
 
-    db.once("open", () => {
+    db.once("open", async () => {
       Ride = db.model("rides", rideSchema);
+      await updateRideStatuses();
+
+      // Execute the code at regular intervals
+      setInterval(async () => {
+        await updateRideStatuses();
+      }, 3600000);
       resolve();
     });
   });
 };
+
+async function updateRideStatuses() {
+  try {
+    const rides = await Ride.find({
+      status: { $nin: ["Complete", "Cancelled", "Not_Completed"] },
+    }).exec();
+
+    for (const ride of rides) {
+      await ride.updateStatus();
+    }
+  } catch (error) {
+    console.error("Error updating ride statuses:", error);
+  }
+}
 
 module.exports.getRide = async (rideId = null) => {
   var rides;
@@ -231,19 +288,19 @@ module.exports.cancelRide = function (rideId) {
   });
 };
 
-module.exports.completeRide = function (rideId) {
+module.exports.changeRideStatus = function (rideId, status) {
   return new Promise(function (resolve, reject) {
     Ride.findById(rideId)
       .then((ride) => {
         if (!ride) {
           reject("Ride not found");
         } else {
-          ride.status = "Complete";
+          ride.status = status;
           return ride.save();
         }
       })
       .then(() => {
-        resolve("Ride has been marked as completed");
+        resolve(`Ride has been marked as ${status}`);
       })
       .catch((err) => {
         reject("There was an error updating the ride: " + err);
@@ -294,6 +351,26 @@ module.exports.addDriverToRide = (rideId, driverData) => {
         }
       }
     );
+  });
+};
+
+module.exports.addIssueToRide = (rideId, issue) => {
+  return new Promise(function (resolve, reject) {
+    Ride.findByIdAndUpdate(rideId, { $push: { issue: issue } }, { new: true })
+      .then((updatedRide) => {
+        if (updatedRide) {
+          resolve(updatedRide);
+          console.log(
+            "The issue data was pushed to issue object and ride was updated"
+          );
+          console.log(Ride);
+        } else {
+          reject(new Error("Ride not found"));
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };
 
