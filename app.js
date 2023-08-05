@@ -516,7 +516,6 @@ app.get(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     const userId = req.params.userId;
-    console.log("hey you are getting matching info");
     userService
       .getUserMatchInfo(userId)
       .then((matchingInfo) => {
