@@ -685,12 +685,10 @@ app.post(
     const rideId = req.params.rideId;
     const issue = {
       description: req.body.description || "",
-      category: req.body.category || "Other",
-      openedBy: req.body.openedBy,
+      category: req.body.category || "Other",     
       priority: req.body.priority,
       issueDate: req.body.issueDate,
-      issueTime: req.body.issueTime,
-      amPmOption: req.body.amPmOption,
+      issueTime: req.body.issueTime,      
       affectedPassengers: req.body.affectedPassengers,
     };
     rideService

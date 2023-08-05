@@ -61,8 +61,7 @@ const rideSchema = Schema({
   },
   issue: {
     type: {
-      description: { type: String },
-      openedBy: { type: String },
+      description: { type: String },      
       priority: { type: String },
       category: {
         type: String,
@@ -76,8 +75,7 @@ const rideSchema = Schema({
         default: "Other",
       },
       issueDate: { type: Date },
-      issueTime: { type: String },
-      amPmOption: { type: String },
+      issueTime: { type: String },  
       affectedPassengers: { type: Boolean },
     },
     default: null,
@@ -369,6 +367,7 @@ module.exports.addIssueToRide = (rideId, issue) => {
         }
       })
       .catch((error) => {
+        console.log(error);
         reject(error);
       });
   });
