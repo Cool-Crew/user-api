@@ -184,7 +184,7 @@ module.exports.getRidesOfUser = async (riderId) => {
           const isDriverSameAsRider = driver === riderId;
           const retVal = {
             rideId: ride._id,
-            dropoffLocation: dropoffLocation?.name || "",
+            dropoffLocation: dropoffLocation,
             dateTime,
             status,
             rating: item?.rating || undefined,
@@ -205,14 +205,14 @@ module.exports.getRidesOfUser = async (riderId) => {
               return {
                 riders: riders.map((rider) => ({
                   riderId: usernameList[rider.riderID],
-                  pickupLocation: rider.pickupLocation?.name || "",
+                  pickupLocation: rider.pickupLocation,
                 })),
                 ...retVal,
               };
             }
           } else {
             const rider = riders?.find((r) => r.riderID === riderId);
-            const pickupLocation = rider?.pickupLocation?.name || "";
+            const pickupLocation = rider?.pickupLocation;
             const driverName = driver
               ? await getUsernames([driver])
               : undefined;
