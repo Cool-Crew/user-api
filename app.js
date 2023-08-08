@@ -693,7 +693,7 @@ app.post(
     rideService
       .addIssueToRide(rideId, issue)
       .then(() => {
-        res.json({
+        res.status(200).json({
           message: `Issue has been reported for the ride`,
         });
         console.log(

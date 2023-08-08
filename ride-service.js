@@ -78,7 +78,6 @@ const rideSchema = Schema({
       issueTime: { type: String },  
       affectedPassengers: { type: Boolean },
     },
-    default: null,
   },
 });
 
