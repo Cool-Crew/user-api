@@ -52,6 +52,10 @@ app.post("/api/register", (req, res) => {
     });
 });
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.post(
   "/api/register-ride",
   passport.authenticate("jwt", { session: false }),
@@ -684,10 +688,10 @@ app.post(
     const rideId = req.params.rideId;
     const issue = {
       description: req.body.description || "",
-      category: req.body.category || "Other",     
+      category: req.body.category || "Other",
       priority: req.body.priority,
       issueDate: req.body.issueDate,
-      issueTime: req.body.issueTime,      
+      issueTime: req.body.issueTime,
       affectedPassengers: req.body.affectedPassengers,
     };
     rideService
