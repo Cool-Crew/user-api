@@ -685,6 +685,8 @@ app.post(
   (req, res) => {
     console.log("We are in the correct function.");
     const rideId = req.params.rideId;
+    const userId = req.body.userId;
+    console.log(`userId is - ${userId}`)
     const issue = {
       description: req.body.description || "",
       category: req.body.category || "Other",
