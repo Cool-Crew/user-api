@@ -77,6 +77,7 @@ const rideSchema = Schema({
       issueDate: { type: Date },
       issueTime: { type: String },  
       affectedPassengers: { type: Boolean },
+      userID: { type: String },
     },
   },
 });

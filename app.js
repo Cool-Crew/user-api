@@ -685,8 +685,8 @@ app.post(
   (req, res) => {
     console.log("We are in the correct function.");
     const rideId = req.params.rideId;
-    const userId = req.body.userId;
-    console.log(`userId is - ${userId}`)
+    //const userId = req.body.userID;
+    console.log(`userId is - ${req.body.userID}`)
     const issue = {
       description: req.body.description || "",
       category: req.body.category || "Other",
@@ -694,7 +694,9 @@ app.post(
       issueDate: req.body.issueDate,
       issueTime: req.body.issueTime,
       affectedPassengers: req.body.affectedPassengers,
+      userID: req.body.userID,
     };
+    console.log(issue);
     rideService
       .addIssueToRide(rideId, issue)
       .then(() => {
