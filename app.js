@@ -686,14 +686,14 @@ app.post(
     console.log("We are in the correct function.");
     const rideId = req.params.rideId;
     const userId = req.body.userId;
-    console.log(`userId is - ${userId}`)
     const issue = {
-      description: req.body.description || "",
-      category: req.body.category || "Other",
-      priority: req.body.priority,
-      issueDate: req.body.issueDate,
-      issueTime: req.body.issueTime,
-      affectedPassengers: req.body.affectedPassengers,
+      issueAuthor: userId,
+      description: req.body.issue.description || "",
+      category: req.body.issue.category || "Other",
+      priority: req.body.issue.priority,
+      issueDate: req.body.issue.issueDate,
+      issueTime: req.body.issue.issueTime,
+      affectedPassengers: req.body.issue.affectedPassengers,
     };
     rideService
       .addIssueToRide(rideId, issue)

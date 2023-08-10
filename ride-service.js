@@ -61,6 +61,7 @@ const rideSchema = Schema({
   },
   issue: {
     type: {
+      issueAuthor: { type: String },
       description: { type: String },      
       priority: { type: String },
       category: {
